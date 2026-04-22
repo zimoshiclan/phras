@@ -8,8 +8,8 @@ export default function Docs() {
         <ol className="list-decimal ml-6 space-y-2 text-neutral-300">
           <li>POST <code className="bg-neutral-800 px-1 rounded">/auth/register</code> — returns your one-time API key</li>
           <li>POST <code className="bg-neutral-800 px-1 rounded">/v1/upload</code> with a text file + source</li>
-          <li>GET <code className="bg-neutral-800 px-1 rounded">/v1/job/{"{"}id{"}"}}</code> until <code className="bg-neutral-800 px-1 rounded">status = complete</code></li>
-          <li>GET <code className="bg-neutral-800 px-1 rounded">/v1/style/{"{"}id{"}"}}?formality=semi_formal&context=email</code></li>
+          <li>GET <code className="bg-neutral-800 px-1 rounded">/v1/job/{'{'}id{'}'}</code> until <code className="bg-neutral-800 px-1 rounded">status = complete</code></li>
+          <li>GET <code className="bg-neutral-800 px-1 rounded">/v1/style/{'{'}id{'}'}?formality=semi_formal&amp;context=email</code></li>
           <li>Inject the returned <code className="bg-neutral-800 px-1 rounded">system_prompt</code> into Claude</li>
         </ol>
       </section>
@@ -69,10 +69,10 @@ const { constraint } = await r.json();
 function EndpointTable() {
   const rows: [string, string, string][] = [
     ["POST", "/auth/register", "Create user + issue one-time API key"],
-    ["POST", "/auth/login", "Email/password → JWT"],
-    ["POST", "/v1/upload", "file + source → job_id"],
-    ["GET", "/v1/job/{id}", "Poll job → style_id when complete"],
-    ["GET", "/v1/style/{id}", "?formality & ?context → constraint + system_prompt"],
+    ["POST", "/auth/login", "Email/password \u2192 JWT"],
+    ["POST", "/v1/upload", "file + source \u2192 job_id"],
+    ["GET", "/v1/job/{id}", "Poll job \u2192 style_id when complete"],
+    ["GET", "/v1/style/{id}", "?formality & ?context \u2192 constraint + system_prompt"],
     ["GET", "/v1/style/{id}/profile", "Dashboard-friendly style vector"],
     ["POST", "/v1/style/{id}/refresh", "Merge new data into profile (60/40)"],
     ["DELETE", "/v1/style/{id}", "Delete profile"],
