@@ -10,5 +10,7 @@ services:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
+      - key: API_KEY_SALT
+        sync: false
       - key: PYTHON_VERSION
         value: "3.11.0"

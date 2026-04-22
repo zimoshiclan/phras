@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { supabase, API_URL } from "@/lib/supabase";
+import { API_URL } from "@/lib/supabase";
 
 type Profile = {
   id: string;
