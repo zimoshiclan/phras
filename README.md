@@ -4,6 +4,9 @@
 
 Built by **Zoraiz Al Raz**.
 
+- **Frontend:** https://phras.vercel.app
+- **Backend API:** https://phras.onrender.com
+
 ---
 
 ## Why I built this
@@ -27,7 +30,7 @@ Your text  →  normalize  →  extract features  →  Style UUID
 ```
 
 1. **Upload** — drop in a `.txt` export (WhatsApp, Telegram JSON, email, Twitter archive, LinkedIn CSV, essay, or plain text)
-2. **Analyze** — a pure-Python pipeline (NLTK + regex, ~50 MB install) extracts 40+ stylometric features: Yule's K, Heylighen F-score, function-word z-scores, emoji position distribution, contraction rate, and more
+2. **Analyze** — a pure-Python pipeline (NLTK + regex) extracts 40+ stylometric features: Yule's K, Heylighen F-score, function-word z-scores, emoji position distribution, contraction rate, and more
 3. **Fetch** — call the REST API with your Style ID and a formality level (`no_censor` / `casual` / `family` / `semi_formal` / `formal`). Get back a `system_prompt` you paste straight into any AI
 4. **Speak** — the AI output matches your register, your vocabulary, your rhythm
 
@@ -35,53 +38,91 @@ Privacy: raw files are deleted immediately after analysis. Only the statistical 
 
 ---
 
-## Quick start
+## Using Phras
 
-### Register and get your API key
+### Option A — Web UI (easiest)
+
+1. Go to **https://phras.vercel.app**
+2. Register at `/auth/register` or use the curl command below to get your API key
+3. Open **Dashboard** → paste your API key → upload a text file → hit **Analyze**
+4. Wait for the job to complete — your Style ID appears on the profile card
+5. Open **Playground** → paste your Style ID → pick a formality level → **Fetch constraint**
+6. Copy the system prompt and paste it into Claude, ChatGPT, or any AI tool
+
+---
+
+### Option B — Terminal (curl)
+
+Open PowerShell (Windows) or Terminal (Mac/Linux) and run these commands in order.
+
+#### 1. Register and get your API key
 
 ```bash
-curl -X POST https://your-backend.onrender.com/auth/register \
+curl -X POST https://phras.onrender.com/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"you@example.com","password":"yourpassword"}'
-# → {"user_id":"...","api_key":"phr_..."}   ← save this key, shown once
 ```
 
-### Upload a text file
+Response:
+```json
+{"user_id":"...","api_key":"phr_..."}
+```
+
+Save the `api_key` — it is shown **once only**.
+
+#### 2. Upload a text file
 
 ```bash
-curl -X POST https://your-backend.onrender.com/v1/upload \
-  -H "X-API-Key: phr_..." \
-  -F "file=@whatsapp_export.txt" \
-  -F "source=whatsapp" \
-  -F "target_sender=Zoraiz"
-# → {"job_id":"...","status":"processing"}
+curl -X POST https://phras.onrender.com/v1/upload \
+  -H "X-API-Key: phr_YOUR_KEY" \
+  -F "file=@yourfile.txt" \
+  -F "source=plain"
 ```
 
-### Poll until done
+For WhatsApp exports add `-F "source=whatsapp" -F "target_sender=YourName"` to filter only your messages.
+
+Response:
+```json
+{"job_id":"...","status":"processing"}
+```
+
+#### 3. Poll until complete
 
 ```bash
-curl https://your-backend.onrender.com/v1/job/{job_id} \
-  -H "X-API-Key: phr_..."
-# → {"status":"complete","style_id":"..."}
+curl https://phras.onrender.com/v1/job/JOB_ID \
+  -H "X-API-Key: phr_YOUR_KEY"
 ```
 
-### Get your style prompt
+Run this every few seconds until `status` is `complete`. You'll get back a `style_id`.
+
+#### 4. Fetch your style prompt
 
 ```bash
-curl "https://your-backend.onrender.com/v1/style/{style_id}?formality=semi_formal&context=email" \
-  -H "X-API-Key: phr_..."
-# → {"constraint":{"system_prompt":"Write in direct sentences averaging 12–15 words..."}}
+curl "https://phras.onrender.com/v1/style/STYLE_ID?formality=semi_formal&context=email" \
+  -H "X-API-Key: phr_YOUR_KEY"
 ```
 
-### Use it in Python with the Anthropic API
+Response contains `constraint.system_prompt` — copy that string.
+
+#### 5. Use it in any AI
+
+Paste the `system_prompt` as the **system prompt** in Claude, ChatGPT, or any tool that accepts one. Every reply will match your writing style.
+
+---
+
+### Option C — Python + Anthropic SDK
 
 ```python
 import requests, anthropic
 
+KEY = "phr_YOUR_KEY"
+STYLE_ID = "YOUR_STYLE_ID"
+API = "https://phras.onrender.com"
+
 style = requests.get(
-    "https://your-backend.onrender.com/v1/style/{STYLE_ID}",
+    f"{API}/v1/style/{STYLE_ID}",
     params={"formality": "semi_formal", "context": "email"},
-    headers={"X-API-Key": "phr_..."},
+    headers={"X-API-Key": KEY},
 ).json()
 
 client = anthropic.Anthropic()
@@ -106,7 +147,7 @@ print(msg.content[0].text)
 | `semi_formal` | 12–15 word sentences, reduced contractions, max 1 emoji |
 | `formal` | No contractions, no emoji, 15–20 word sentences, impersonal constructions |
 
-Context modifiers: `email`, `reply`, `tweet`, `linkedin`, `general` — appended to the prompt to shape format and sign-off.
+Context modifiers: `email`, `reply`, `tweet`, `linkedin`, `general` — shape format and sign-off.
 
 ---
 
@@ -182,17 +223,6 @@ cd frontend && npm run dev
 ```
 
 Backend: `http://localhost:8000` · Frontend: `http://localhost:3000`
-
-### 5. Deploy
-
-**Backend → Render** (repo has a `render.yaml` — Render reads it automatically):
-- Connect your GitHub repo
-- Add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in the Render dashboard
-- First cold start takes ~60s (NLTK tagger downloads once)
-
-**Frontend → Vercel**:
-- Import repo, set root directory to `frontend`
-- Add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_API_URL`
 
 ---
 
