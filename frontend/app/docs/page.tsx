@@ -10,8 +10,48 @@ export default function Docs() {
           <li>POST <code className="bg-neutral-800 px-1 rounded">/v1/upload</code> with a text file + source</li>
           <li>GET <code className="bg-neutral-800 px-1 rounded">/v1/job/{'{'}id{'}'}</code> until <code className="bg-neutral-800 px-1 rounded">status = complete</code></li>
           <li>GET <code className="bg-neutral-800 px-1 rounded">/v1/style/{'{'}id{'}'}?formality=semi_formal&amp;context=email</code></li>
-          <li>Inject the returned <code className="bg-neutral-800 px-1 rounded">system_prompt</code> into Claude</li>
+          <li>Inject the returned <code className="bg-neutral-800 px-1 rounded">system_prompt</code> into any AI</li>
         </ol>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold">Claude Code skill</h2>
+        <p className="text-neutral-400 text-sm">
+          Use <code className="bg-neutral-800 px-1 rounded">/phras</code> directly inside Claude Code to fetch and apply your style without leaving your editor.
+        </p>
+
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm font-medium text-neutral-300 mb-1">Install globally (works in any project)</p>
+            <pre className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 text-sm overflow-x-auto text-neutral-200">
+{`# Mac / Linux
+cp .claude/commands/phras.md ~/.claude/commands/phras.md
+
+# Windows PowerShell
+Copy-Item .claude\\commands\\phras.md "$env:USERPROFILE\\.claude\\commands\\phras.md"`}
+            </pre>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium text-neutral-300 mb-1">One-time setup — store your credentials</p>
+            <pre className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 text-sm overflow-x-auto text-neutral-200">
+{`claude config set env.PHRAS_API_KEY phr_your_key_here
+claude config set env.PHRAS_STYLE_ID your_style_id_here`}
+            </pre>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium text-neutral-300 mb-1">Usage</p>
+            <pre className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 text-sm overflow-x-auto text-neutral-200">
+{`/phras                      # semi_formal, general context
+/phras casual               # casual voice
+/phras formal email         # formal + email format
+/phras no_censor            # full unfiltered voice
+/phras semi_formal linkedin # semi-formal for LinkedIn`}
+            </pre>
+            <p className="text-xs text-neutral-500 mt-2">Claude fetches your style constraint and writes in your voice for the rest of that conversation.</p>
+          </div>
+        </div>
       </section>
 
       <section className="space-y-3">
@@ -69,10 +109,10 @@ const { constraint } = await r.json();
 function EndpointTable() {
   const rows: [string, string, string][] = [
     ["POST", "/auth/register", "Create user + issue one-time API key"],
-    ["POST", "/auth/login", "Email/password \u2192 JWT"],
-    ["POST", "/v1/upload", "file + source \u2192 job_id"],
-    ["GET", "/v1/job/{id}", "Poll job \u2192 style_id when complete"],
-    ["GET", "/v1/style/{id}", "?formality & ?context \u2192 constraint + system_prompt"],
+    ["POST", "/auth/login", "Email/password → JWT"],
+    ["POST", "/v1/upload", "file + source → job_id"],
+    ["GET", "/v1/job/{id}", "Poll job → style_id when complete"],
+    ["GET", "/v1/style/{id}", "?formality & ?context → constraint + system_prompt"],
     ["GET", "/v1/style/{id}/profile", "Dashboard-friendly style vector"],
     ["POST", "/v1/style/{id}/refresh", "Merge new data into profile (60/40)"],
     ["DELETE", "/v1/style/{id}", "Delete profile"],

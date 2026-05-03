@@ -31,7 +31,7 @@ Your text  →  normalize  →  extract features  →  Style UUID
 
 1. **Upload** — drop in a `.txt` export (WhatsApp, Telegram JSON, email, Twitter archive, LinkedIn CSV, essay, or plain text)
 2. **Analyze** — a pure-Python pipeline (NLTK + regex) extracts 40+ stylometric features: Yule's K, Heylighen F-score, function-word z-scores, emoji position distribution, contraction rate, and more
-3. **Fetch** — call the REST API with your Style ID and a formality level (`no_censor` / `casual` / `family` / `semi_formal` / `formal`). Get back a `system_prompt` you paste straight into any AI
+3. **Fetch** — call the REST API with your Style ID and a formality level. Get back a `system_prompt` you paste into any AI
 4. **Speak** — the AI output matches your register, your vocabulary, your rhythm
 
 Privacy: raw files are deleted immediately after analysis. Only the statistical vector is stored — never the original text.
@@ -53,7 +53,7 @@ Privacy: raw files are deleted immediately after analysis. Only the statistical 
 
 ### Option B — Terminal (curl)
 
-> **Windows PowerShell note:** PowerShell’s `curl` is an alias for a different command. Use `curl.exe` instead, and escape inner quotes with backslashes as shown below.
+> **Windows PowerShell note:** Use `curl.exe` instead of `curl`, and escape inner quotes with backslashes as shown.
 
 #### 1. Register and get your API key
 
@@ -69,12 +69,7 @@ curl -X POST https://phras.onrender.com/auth/register \
 curl.exe -X POST https://phras.onrender.com/auth/register -H "Content-Type: application/json" -d '{\"email\":\"you@example.com\",\"password\":\"yourpassword\"}'
 ```
 
-Response:
-```json
-{"user_id":"...","api_key":"phr_..."}
-```
-
-Save the `api_key` — it is shown **once only**.
+Save the `api_key` from the response — it is shown **once only**.
 
 #### 2. Upload a text file
 
@@ -91,19 +86,13 @@ curl -X POST https://phras.onrender.com/v1/upload \
 curl.exe -X POST https://phras.onrender.com/v1/upload -H "X-API-Key: phr_YOUR_KEY" -F "file=@yourfile.txt" -F "source=plain"
 ```
 
-For WhatsApp exports add `-F "source=whatsapp" -F "target_sender=YourName"` to filter only your messages.
-
-Response:
-```json
-{"job_id":"...","status":"processing"}
-```
+For WhatsApp add `-F "source=whatsapp" -F "target_sender=YourName"`.
 
 #### 3. Poll until complete
 
 **Mac / Linux**
 ```bash
-curl https://phras.onrender.com/v1/job/JOB_ID \
-  -H "X-API-Key: phr_YOUR_KEY"
+curl https://phras.onrender.com/v1/job/JOB_ID -H "X-API-Key: phr_YOUR_KEY"
 ```
 
 **Windows PowerShell**
@@ -111,7 +100,7 @@ curl https://phras.onrender.com/v1/job/JOB_ID \
 curl.exe https://phras.onrender.com/v1/job/JOB_ID -H "X-API-Key: phr_YOUR_KEY"
 ```
 
-Run this every few seconds until `status` is `complete`. You’ll get back a `style_id`.
+Run until `status` is `complete`. You’ll get back a `style_id`.
 
 #### 4. Fetch your style prompt
 
@@ -126,15 +115,58 @@ curl "https://phras.onrender.com/v1/style/STYLE_ID?formality=semi_formal&context
 curl.exe "https://phras.onrender.com/v1/style/STYLE_ID?formality=semi_formal&context=email" -H "X-API-Key: phr_YOUR_KEY"
 ```
 
-Response contains `constraint.system_prompt` — copy that string.
+---
 
-#### 5. Use it in any AI
+### Option C — Claude Code skill (`/phras`)
 
-Paste the `system_prompt` as the **system prompt** in Claude, ChatGPT, or any tool that accepts one. Every reply will match your writing style.
+Use Phras directly inside Claude Code without leaving your editor.
+
+#### Install
+
+**Option 1 — project-level** (works when you have the phras repo open):
+```bash
+git clone https://github.com/zimoshiclan/phras.git
+# open the phras folder in Claude Code — the skill is included automatically
+```
+
+**Option 2 — global** (works in any project):
+
+Copy `.claude/commands/phras.md` from this repo into your global commands folder:
+
+```bash
+# Mac / Linux
+cp .claude/commands/phras.md ~/.claude/commands/phras.md
+
+# Windows PowerShell
+Copy-Item .claude\commands\phras.md "$env:USERPROFILE\.claude\commands\phras.md"
+```
+
+#### One-time setup
+
+Set your API key and Style ID so the skill can fetch your profile automatically:
+
+```bash
+claude config set env.PHRAS_API_KEY phr_your_key_here
+claude config set env.PHRAS_STYLE_ID your_style_id_here
+```
+
+Get your API key by registering above. Get your Style ID from the Dashboard after uploading a file.
+
+#### Usage
+
+```
+/phras                     # semi_formal voice, general context (default)
+/phras casual              # casual voice
+/phras formal email        # formal voice + email format
+/phras no_censor           # your full unfiltered voice
+/phras semi_formal linkedin  # semi-formal for LinkedIn posts
+```
+
+Claude fetches your style constraint from the Phras API and writes in your voice for the rest of that conversation.
 
 ---
 
-### Option C — Python + Anthropic SDK
+### Option D — Python + Anthropic SDK
 
 ```python
 import requests, anthropic
@@ -210,10 +242,7 @@ cd phras
 1. Create a project at [supabase.com](https://supabase.com)
 2. SQL Editor → paste `backend/sql/001_init.sql` → Run
 3. Storage → New bucket → name `raw-uploads`, set **private**
-4. Project Settings → API → copy:
-   - **URL** → `SUPABASE_URL` (backend) and `NEXT_PUBLIC_SUPABASE_URL` (frontend)
-   - **service_role** key → `SUPABASE_SERVICE_ROLE_KEY` (backend only)
-   - **anon** key → `NEXT_PUBLIC_SUPABASE_ANON_KEY` (frontend)
+4. Project Settings → API → copy URL and keys into your `.env` files
 5. Authentication → Providers → Email → disable **Confirm email**
 
 ### 3. Configure environment
@@ -269,38 +298,38 @@ Backend: `http://localhost:8000` · Frontend: `http://localhost:3000`
 | Frontend | Next.js 14 · TypeScript · Tailwind CSS |
 | Deploy | Render (backend) · Vercel (frontend) |
 
-No LLMs or large model files in the extraction pipeline. The heaviest dependency is the NLTK averaged perceptron tagger at ~6 MB.
-
 ---
 
 ## Project structure
 
 ```
 phras/
+├── .claude/
+│   └── commands/
+│       └── phras.md          Claude Code skill (/phras)
 ├── backend/
-│   ├── main.py               FastAPI app, CORS, health check
+│   ├── main.py
 │   ├── requirements.txt
 │   ├── engine/
-│   │   ├── normalizers.py    Per-source text cleaning (WhatsApp, email, etc.)
-│   │   ├── extractor.py      40+ stylometric features
-│   │   └── formality.py      5-level constraint generator + system_prompt builder
+│   │   ├── normalizers.py
+│   │   ├── extractor.py
+│   │   └── formality.py
 │   ├── routes/
-│   │   ├── auth.py           Register / login
-│   │   ├── upload.py         File upload + background analysis job
-│   │   ├── jobs.py           Job status polling
-│   │   ├── style.py          Style retrieval, refresh, delete, export
-│   │   └── security.py       API key hashing + verification middleware
+│   │   ├── auth.py
+│   │   ├── upload.py
+│   │   ├── jobs.py
+│   │   ├── style.py
+│   │   └── security.py
 │   ├── db/
 │   │   └── supabase_client.py
-│   ├── sql/
-│   │   └── 001_init.sql      Schema: api_keys, style_profiles, upload_jobs
-│   └── tests/
+│   └── sql/
+│       └── 001_init.sql
 └── frontend/
     ├── app/
-    │   ├── page.tsx          Landing
-    │   ├── dashboard/        Upload panel + profile cards
-    │   ├── playground/       Style selector + system prompt preview
-    │   └── docs/             API reference
+    │   ├── page.tsx
+    │   ├── dashboard/
+    │   ├── playground/
+    │   └── docs/
     └── lib/
         └── supabase.ts
 ```
