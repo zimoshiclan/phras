@@ -131,8 +131,6 @@ git clone https://github.com/zimoshiclan/phras.git
 
 **Option 2 — global** (works in any project):
 
-Copy `.claude/commands/phras.md` from this repo into your global commands folder:
-
 ```bash
 # Mac / Linux
 cp .claude/commands/phras.md ~/.claude/commands/phras.md
@@ -143,26 +141,22 @@ Copy-Item .claude\commands\phras.md "$env:USERPROFILE\.claude\commands\phras.md"
 
 #### One-time setup
 
-Set your API key and Style ID so the skill can fetch your profile automatically:
-
 ```bash
 claude config set env.PHRAS_API_KEY phr_your_key_here
 claude config set env.PHRAS_STYLE_ID your_style_id_here
 ```
 
-Get your API key by registering above. Get your Style ID from the Dashboard after uploading a file.
-
 #### Usage
 
 ```
-/phras                     # semi_formal voice, general context (default)
-/phras casual              # casual voice
-/phras formal email        # formal voice + email format
-/phras no_censor           # your full unfiltered voice
-/phras semi_formal linkedin  # semi-formal for LinkedIn posts
+/phras                       # semi_formal voice, general context
+/phras casual                # casual voice
+/phras formal email          # formal + email format
+/phras no_censor             # full unfiltered voice
+/phras semi_formal linkedin  # semi-formal for LinkedIn
 ```
 
-Claude fetches your style constraint from the Phras API and writes in your voice for the rest of that conversation.
+Claude fetches your style constraint and writes in your voice for the rest of that conversation.
 
 ---
 
@@ -338,4 +332,10 @@ phras/
 
 ## License
 
-MIT — do whatever you want with it.
+MIT — see [LICENSE](LICENSE) for full text.
+
+---
+
+## Contact
+
+For suggestions, help, or feedback: **3den.org@gmail.com**
