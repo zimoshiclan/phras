@@ -43,7 +43,7 @@ Privacy: raw files are deleted immediately after analysis. Only the statistical 
 ### Option A — Web UI (easiest)
 
 1. Go to **https://phras.vercel.app**
-2. Register at `/auth/register` or use the curl command below to get your API key
+2. Register using the curl command below to get your API key
 3. Open **Dashboard** → paste your API key → upload a text file → hit **Analyze**
 4. Wait for the job to complete — your Style ID appears on the profile card
 5. Open **Playground** → paste your Style ID → pick a formality level → **Fetch constraint**
@@ -53,14 +53,20 @@ Privacy: raw files are deleted immediately after analysis. Only the statistical 
 
 ### Option B — Terminal (curl)
 
-Open PowerShell (Windows) or Terminal (Mac/Linux) and run these commands in order.
+> **Windows PowerShell note:** PowerShell’s `curl` is an alias for a different command. Use `curl.exe` instead, and escape inner quotes with backslashes as shown below.
 
 #### 1. Register and get your API key
 
+**Mac / Linux**
 ```bash
 curl -X POST https://phras.onrender.com/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"you@example.com","password":"yourpassword"}'
+```
+
+**Windows PowerShell**
+```powershell
+curl.exe -X POST https://phras.onrender.com/auth/register -H "Content-Type: application/json" -d '{\"email\":\"you@example.com\",\"password\":\"yourpassword\"}'
 ```
 
 Response:
@@ -72,11 +78,17 @@ Save the `api_key` — it is shown **once only**.
 
 #### 2. Upload a text file
 
+**Mac / Linux**
 ```bash
 curl -X POST https://phras.onrender.com/v1/upload \
   -H "X-API-Key: phr_YOUR_KEY" \
   -F "file=@yourfile.txt" \
   -F "source=plain"
+```
+
+**Windows PowerShell**
+```powershell
+curl.exe -X POST https://phras.onrender.com/v1/upload -H "X-API-Key: phr_YOUR_KEY" -F "file=@yourfile.txt" -F "source=plain"
 ```
 
 For WhatsApp exports add `-F "source=whatsapp" -F "target_sender=YourName"` to filter only your messages.
@@ -88,18 +100,30 @@ Response:
 
 #### 3. Poll until complete
 
+**Mac / Linux**
 ```bash
 curl https://phras.onrender.com/v1/job/JOB_ID \
   -H "X-API-Key: phr_YOUR_KEY"
 ```
 
-Run this every few seconds until `status` is `complete`. You'll get back a `style_id`.
+**Windows PowerShell**
+```powershell
+curl.exe https://phras.onrender.com/v1/job/JOB_ID -H "X-API-Key: phr_YOUR_KEY"
+```
+
+Run this every few seconds until `status` is `complete`. You’ll get back a `style_id`.
 
 #### 4. Fetch your style prompt
 
+**Mac / Linux**
 ```bash
 curl "https://phras.onrender.com/v1/style/STYLE_ID?formality=semi_formal&context=email" \
   -H "X-API-Key: phr_YOUR_KEY"
+```
+
+**Windows PowerShell**
+```powershell
+curl.exe "https://phras.onrender.com/v1/style/STYLE_ID?formality=semi_formal&context=email" -H "X-API-Key: phr_YOUR_KEY"
 ```
 
 Response contains `constraint.system_prompt` — copy that string.
@@ -179,12 +203,6 @@ Context modifiers: `email`, `reply`, `tweet`, `linkedin`, `general` — shape fo
 ```bash
 git clone https://github.com/zimoshiclan/phras.git
 cd phras
-
-# Windows
-setup.bat
-
-# macOS / Linux
-chmod +x setup.sh && ./setup.sh
 ```
 
 ### 2. Set up Supabase
@@ -196,7 +214,7 @@ chmod +x setup.sh && ./setup.sh
    - **URL** → `SUPABASE_URL` (backend) and `NEXT_PUBLIC_SUPABASE_URL` (frontend)
    - **service_role** key → `SUPABASE_SERVICE_ROLE_KEY` (backend only)
    - **anon** key → `NEXT_PUBLIC_SUPABASE_ANON_KEY` (frontend)
-5. Authentication → Providers → Email → disable **Confirm email** (for local dev)
+5. Authentication → Providers → Email → disable **Confirm email**
 
 ### 3. Configure environment
 
